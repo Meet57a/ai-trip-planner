@@ -12,9 +12,10 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Link, useLocation } from "react-router-dom"
+import { useLocation } from "react-router-dom"
 import { useEffect, useState } from "react"
-
+import { signUp } from "@/services/auth"
+import { toast } from 'react-toastify';
 
 
 const formSchema = z.object({
@@ -25,8 +26,6 @@ const formSchema = z.object({
 
 const Auth = () => {
   const location = useLocation();
-
-
 
   type authType = "login" | "signup";
 
@@ -41,9 +40,20 @@ const Auth = () => {
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+console.log(values);
 
-    console.log(values)
+    const res = await signUp(values);
+    
+    if(res.status === 200){
+      toast.success(res.msg)
+      localStorage.setItem('token', res.token)
+    }else{
+      toast.error(res.msg)
+    }
+
+    // if (res) { }
+
   }
 
 
@@ -54,7 +64,7 @@ const Auth = () => {
 
   useEffect(() => {
     setAuthTypeByUrl()
-   }, [location])
+  }, [location])
 
   return (
     <div className="mx-auto mt-36 border p-8 rounded-lg shadow-lg max-sm:mx-4 min-[700px]:w-1/3">
@@ -132,7 +142,7 @@ const Auth = () => {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">Sign Up</Button>
+            <Button type="submit" className="w-full" onClick={() => onSubmit}>Sign Up</Button>
           </form>
           <div className="text-center mt-3">Already have an account? <Button variant={"link"} className="p-0 underline" onClick={() => setAuthType("login")}>Sign In</Button></div>
         </Form>
