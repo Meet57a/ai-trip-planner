@@ -4,6 +4,10 @@ const routes = [
     {
         path: "/auth",
         router: require('../routes/auth.route')
+    },
+    {
+        path: "/trip",
+        router: require('../routes/create-trip-route')
     }
 ];
 

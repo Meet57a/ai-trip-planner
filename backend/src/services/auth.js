@@ -28,3 +28,30 @@ exports.signUpService = async (req, res) => {
         res.status(500).json({ status: false, msg: error, statusCode: 500 });
     }
 }
+
+exports.signInService = async (req, res) => {
+    try {
+        var { email, password } = req.body;
+
+        const exists = await AuthModel.findOne({ email: email });
+
+        if (exists) {
+            const compare = await bcrypt.compare(password, exists.password);
+
+            if (compare) {
+                const token = await tokenGenerate(exists);
+                res.status(200).json({ status: true, msg: "User login successfully.", token: token });
+
+            } else {
+                res.status(400).json({ status: false, msg: "Invalid password." });
+            }
+
+        } else {
+            res.status(400).json({ status: false, msg: "User not found." });
+        }
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ status: false, msg: error, statusCode: 500 });
+    }
+}

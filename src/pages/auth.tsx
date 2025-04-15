@@ -12,9 +12,9 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { useLocation } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
-import { signUp } from "@/services/auth"
+import { signUp, signIn } from "@/services/auth"
 import { toast } from 'react-toastify';
 
 
@@ -26,6 +26,7 @@ const formSchema = z.object({
 
 const Auth = () => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   type authType = "login" | "signup";
 
@@ -41,18 +42,29 @@ const Auth = () => {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-console.log(values);
 
-    const res = await signUp(values);
-    
-    if(res.status === 200){
-      toast.success(res.msg)
-      localStorage.setItem('token', res.token)
-    }else{
-      toast.error(res.msg)
+    if (authType === "signup") {
+      const res = await signUp(values);
+
+      if (res.status) {
+        toast.success(res.msg)
+        localStorage.setItem('token', res.token)
+        navigate("/home")
+
+      } else {
+        toast.error(res.msg)
+      }
+    } else {
+      const res = await signIn(values);
+
+      if (res.status) {
+        toast.success(res.msg)
+        localStorage.setItem('token', res.token)
+        navigate("/home")
+      } else {
+        toast.error(res.msg)
+      }
     }
-
-    // if (res) { }
 
   }
 
@@ -84,7 +96,7 @@ console.log(values);
                 <FormItem>
                   <FormLabel>E-mail</FormLabel>
                   <FormControl>
-                    <Input placeholder="shadcn" {...field} />
+                    <Input placeholder="E-mail" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -97,7 +109,7 @@ console.log(values);
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input placeholder="shadcn" {...field} />
+                    <Input placeholder="Password" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -123,7 +135,7 @@ console.log(values);
                 <FormItem>
                   <FormLabel>E-mail</FormLabel>
                   <FormControl>
-                    <Input placeholder="shadcn" {...field} />
+                    <Input placeholder="E-mail" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -136,7 +148,7 @@ console.log(values);
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input placeholder="shadcn" {...field} />
+                    <Input placeholder="Password" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

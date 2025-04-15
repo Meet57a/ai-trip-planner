@@ -12,6 +12,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Textarea } from "@/components/ui/textarea"
+import { createTrip } from "@/services/trip"
+import { toast } from 'react-toastify';
+import { useNavigate } from "react-router-dom"
 
 
 
@@ -52,6 +55,7 @@ const travelTypeOptions = [
 
 
 const CreateTrip = () => {
+  const navigate = useNavigate()
   type form = {
     destination: string,
     startDate: string,
@@ -61,6 +65,7 @@ const CreateTrip = () => {
     travelType: string,
     preferredActivities: string,
     preferredTransport: string,
+    additionalRequests: string
   }
 
   const [form, setForm] = useState<form>({
@@ -71,15 +76,16 @@ const CreateTrip = () => {
     accommodationType: '',
     travelType: '',
     preferredActivities: '',
-    preferredTransport: ''
+    preferredTransport: '',
+    additionalRequests: ''
   })
+  const [loading, setLoading] = useState(false)
 
 
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setForm({ ...form, [name]: value })
-    console.log(form);
 
   }
 
@@ -91,6 +97,26 @@ const CreateTrip = () => {
       setForm({ ...form, preferredTransport: value })
     }
   }
+
+  const handleSubmit = async () => {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      toast.error("Please login to create a trip")
+      return
+    }
+    setLoading(true)
+    var prom = `Generate a detailed travel plan for ${form.destination} from ${form.startDate} to ${form.endDate} within a ${form.budget} budget. The plan should include budget estimation by calculating approximate costs for accommodation, travel, and activities. Provide a list of hotels based on the preferred ${form.accommodationType}, including details such as hotel name, address, price per night, image URL, geo coordinates, rating, and a brief description. Additionally, incorporate AI-based recommendations for hotels, attractions, restaurants, and transport options tailored to the user's ${form.travelType} and ${form.preferredActivities}. The itinerary should be structured with a day-wise schedule, suggesting the best time to visit each location and including place names, descriptions, image URLs, geo coordinates, ticket pricing, and estimated travel time between locations. Integrate a real-time weather forecast for the selected destination to help users plan accordingly. Consider any ${form.additionalRequests} to ensure a personalized and optimized travel experience. Present the output in JSON format for seamless integration.`
+ 
+    const response = await createTrip(prom)
+    
+    if (response.status) {
+      navigate('/trip',{state: response.id})
+    } else {
+      toast.error(response.msg.message)
+    }
+    setLoading(false)
+  }
+
   return (
     <div className='w-1/2 mx-auto mt-10 tracking-wider max-sm:w-full p-4 max-sm:mt-1'>
       <div>
@@ -100,15 +126,15 @@ const CreateTrip = () => {
       <div className="mt-10">
         <div className="text-xl font-semibold">🛫 Trip Details</div>
         <div className="mt-2">
-          <Input placeholder='Destination (City/Country)' />
+          <Input placeholder='Destination (City/Country)' onChange={handleChange} name="destination"/>
           <div className="flex gap-4 mt-4">
             <div className="grid w-full max-w-sm items-center gap-1.5">
               <Label htmlFor="startdate">Start Date</Label>
-              <Input type="date" id="startdate" placeholder="start Date" />
+              <Input type="date" id="startdate" placeholder="start Date" onChange={handleChange} name="startDate"/>
             </div>
             <div className="grid w-full max-w-sm items-center gap-1.5">
               <Label htmlFor="enddate">End Date</Label>
-              <Input type="date" id="enddate" placeholder="End Date" />
+              <Input type="date" id="enddate" placeholder="End Date" onChange={handleChange} name="endDate"/>
             </div>
           </div>
           <div className="mt-4">
@@ -196,9 +222,9 @@ const CreateTrip = () => {
 
       <div className="mt-10">
         <div className="text-xl font-semibold">📝 Additional Requests</div>
-        <Textarea className="mt-4" placeholder="Any special requests? (Dietary, accessibility, etc.)" rows={6} />
+        <Textarea className="mt-4" placeholder="Any special requests? (Dietary, accessibility, etc.)" rows={6} onChange={handleChange} name="additionalRequests"/>
       </div>
-      <Button className="mt-4 mb-20 w-full">🚀 Generate AI Trip Plan</Button>
+      <Button className="mt-4 mb-20 w-full" onClick={handleSubmit}>{loading ? "Wait....." : "🚀 Generate AI Trip Plan"}</Button>
     </div>
   )
 }
