@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import { getTrip } from "@/services/trip"
 import { Fragment, useEffect, useState } from "react"
 import { buttonVariants } from "@/components/ui/button"

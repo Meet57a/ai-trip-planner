@@ -1,14 +1,12 @@
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
+
     DialogHeader,
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { Trip } from "@/models/trip"
-import { set } from "date-fns"
-import { use, useEffect, useState } from "react"
+
 
 
 const PopUpDetails = ({ item, index }: any) => {
